@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "games": [
+    {
+      "id": "bloxfruits",
+      "name": "Blox Fruits",
+      "places": [2753915549, 4442272183, 7449423635],
+      "universe": 994732206
+    }
+  ]
+}

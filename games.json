@@ -2,10 +2,10 @@
   "version": 1,
   "games": [
     {
-      "id": "bloxfruits",
-      "name": "Blox Fruits",
-      "places": [2753915549, 4442272183, 7449423635],
-      "universe": 994732206
+      "id": "southlondon",
+      "name": "South London Remastered",
+      "places": [114478751418135],
+      "universe": 7428819247
     }
   ]
 }

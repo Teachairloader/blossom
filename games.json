@@ -5,7 +5,8 @@
       "id": "southlondon",
       "name": "South London Remastered",
       "places": [114478751418135],
-      "universe": 7428819247
+      "universe": 7428819247,
+      "icon": "rbxthumb://type=GameIcon&id=114478751418135&w=150&h=150"
     }
   ]
 }

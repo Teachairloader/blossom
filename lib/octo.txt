@@ -20,7 +20,12 @@
     local Mouse = LocalPlayer:GetMouse()
     local vec2, vec3, dim2, dim, rect, dim_offset = Vector2.new, Vector3.new, UDim2.new, UDim.new, Rect.new, UDim2.fromOffset
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
-    local angle, empty_cfr, cfr = CFrame.Angles, CFrame.new(), CFrame.new
+    local function safeClipboard(text)
+    local fn = setclipboard or (getgenv and getgenv().setclipboard)
+    if type(fn) == "function" then pcall(fn, text) end
+end
+
+local angle, empty_cfr, cfr = CFrame.Angles, CFrame.new(), CFrame.new
 -- 
 
 -- Library init
@@ -1697,7 +1702,7 @@
             }); 
 
             Library.Elements = Library:Create( "ScreenGui" , {
-                Parent = gethui();
+                Parent = (gethui and gethui()) or game:GetService("CoreGui");
                 Name = "\0";
                 Enabled = true;
                 ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
@@ -4860,13 +4865,13 @@
 
                 local Section = Column:Section({Name = "Server"})
                 Section:Button({Name = "Copy JobId", Callback = function()
-                    setclipboard(game.JobId)
+                    safeClipboard(game.JobId)
                 end})
                 Section:Button({Name = "Copy GameID", Callback = function()
-                    setclipboard(game.GameId)
+                    safeClipboard(game.GameId)
                 end})
                 Section:Button({Name = "Copy Join Script", Callback = function()
-                    setclipboard('game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '", game.Players.LocalPlayer)')
+                    safeClipboard('game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '", game.Players.LocalPlayer)')
                 end})
                 Section:Button({Name = "Rejoin", Callback = function()
                     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, lp)
@@ -7414,7 +7419,7 @@
         Players = {}, 
         PlayersOptions = {},
         ScreenGui = Instance.new("ScreenGui", CoreGui), 
-        Cache = Instance.new("ScreenGui", gethui()), 
+        Cache = Instance.new("ScreenGui", (gethui and gethui()) or game:GetService("CoreGui")), 
         Connections = {}, 
     }; do 
         Esp.ScreenGui.IgnoreGuiInset = true

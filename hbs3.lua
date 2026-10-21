@@ -151,7 +151,7 @@ local function clientScripts()
     return list
 end
 
-local CALL_PATTERN = "([%a_][%w_%.%[%]\"'_:]-):(%a+Server)%(([^()]*)%)"
+local CALL_PATTERN = "([%a_][%w_%.%[%]\"'_:]-):(%a+Server)%((.*)%)"
 
 local function trim(text, limit)
     text = (text:gsub("%s+", " "))
@@ -174,22 +174,24 @@ local function collect()
         local ok, source = pcall(decompile, instance)
         modules = modules + 1
         if ok and type(source) == "string" then
-            for remote, method, args in source:gmatch(CALL_PATTERN) do
-                local key = remote .. ":" .. method
-                local entry = calls[key]
-                if not entry then
-                    entry = {
-                        remote = remote,
-                        method = method,
-                        module = instance.Name,
-                        count = 0,
-                        samples = {},
-                    }
-                    calls[key] = entry
-                end
-                entry.count = entry.count + 1
-                if #entry.samples < 3 then
-                    entry.samples[#entry.samples + 1] = trim(args, H3.maxArgs or 96)
+            for line in source:gmatch("[^\r\n]+") do
+                for remote, method, args in line:gmatch(CALL_PATTERN) do
+                    local key = remote .. ":" .. method
+                    local entry = calls[key]
+                    if not entry then
+                        entry = {
+                            remote = remote,
+                            method = method,
+                            module = instance.Name,
+                            count = 0,
+                            samples = {},
+                        }
+                        calls[key] = entry
+                    end
+                    entry.count = entry.count + 1
+                    if #entry.samples < 3 then
+                        entry.samples[#entry.samples + 1] = trim(args, H3.maxArgs or 96)
+                    end
                 end
             end
         end
@@ -226,6 +228,29 @@ local function render(filter)
     local needle = filter and filter:lower() or nil
     say(string.format("-- %d call sites across %d scripts", #list, modules or 0),
         Color3.fromRGB(169, 209, 142))
+
+    local combatNames = {}
+    local keywords = { "hit", "damage", "dmg", "shot", "bullet", "attack", "kill" }
+    for _, descendant in ipairs(ReplicatedStorage:GetDescendants()) do
+        local class = descendant.ClassName
+        if class == "RemoteEvent" or class == "RemoteFunction"
+            or class == "UnreliableRemoteEvent" then
+            local lower = descendant.Name:lower()
+            for _, keyword in ipairs(keywords) do
+                if lower:find(keyword, 1, true) then
+                    combatNames[#combatNames + 1] = descendant:GetFullName()
+                    break
+                end
+            end
+        end
+    end
+
+    if #combatNames > 0 then
+        say("-- combat-named remotes that actually exist", Color3.fromRGB(169, 209, 142))
+        for index = 1, math.min(#combatNames, 12) do
+            say("  " .. combatNames[index], Color3.fromRGB(200, 220, 190))
+        end
+    end
 
     local shown = 0
     for _, entry in ipairs(list) do
